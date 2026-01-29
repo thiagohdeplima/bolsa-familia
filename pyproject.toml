@@ -27,6 +27,7 @@ dependencies = [
 
 [tool.poetry]
 packages = [
+  { include = "extractor", from = "lib" },
   { include = "ingestion", from = "lib" },
   { include = "pipelines", from = "src" },
 ]
