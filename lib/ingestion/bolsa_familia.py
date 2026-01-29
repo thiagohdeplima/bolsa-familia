@@ -86,7 +86,7 @@ class BolsaFamiliaDownloader(Downloader):
           target_path.unlink()
           raise e
 
-        return self.destination
+        return target_path
 
       with open(target_path, 'ab') as f:
         for chunck in download.iter_content(chunk_size=4096):
