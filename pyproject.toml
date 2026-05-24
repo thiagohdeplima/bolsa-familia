@@ -21,6 +21,7 @@ dependencies = [
   "duckdb-engine (>=0.17.0,<0.18.0)",
   "toml (>=0.10.2,<0.11.0)",
   "prefect (>=3.7.2,<4.0.0)",
+  "greenlet (>=3.5.1,<4.0.0)",
 ]
 
 
