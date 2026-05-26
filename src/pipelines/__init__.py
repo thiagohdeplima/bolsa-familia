@@ -12,21 +12,25 @@ def download(year: int, month: int) -> Path:
 @flow
 def main():
   current = Program.BOLSA_FAMILIA_1.value
-  month = current.month
-  year = current.year
 
   while date.today() >= current:
     download.with_options(
-      name=f"download-{current.year}-{current.month:02}"
+      name=f"download-bf-{current.year}-{current.month:02}"
     ).submit(
       year=current.year,
       month=current.month,
     )
 
-    month += 1
+    current = get_next_month(current)
 
-    if month > 12:
-      month = 1
-      year += 1
+def get_next_month(current: date) -> date:
+  year = current.year
+  month = current.month
 
-    current = date(year, month, 1)
+  month += 1
+
+  if month > 12:
+    month = 1
+    year += 1
+
+  return date(year, month, 1)
