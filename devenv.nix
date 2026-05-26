@@ -20,5 +20,9 @@
     jupyter = {
       exec = "poetry run jupyter lab --ServerApp.token=''";
     };
+
+    prefect = {
+      exec = "poetry run prefect server start";
+    };
   };
 }
