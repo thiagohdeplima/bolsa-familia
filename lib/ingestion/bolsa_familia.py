@@ -79,11 +79,14 @@ class BolsaFamiliaDownloader(Downloader):
       try:
         download.raise_for_status()
       except requests.exceptions.HTTPError as e:
-        if e.response.status_code == 416:
-          return self.destination
+        if e.response is None:
+          raise e
 
-        target_path.unlink()
-        raise e
+        if e.response.status_code != 416:
+          target_path.unlink()
+          raise e
+
+        return self.destination
 
       with open(target_path, 'ab') as f:
         for chunck in download.iter_content(chunk_size=4096):
