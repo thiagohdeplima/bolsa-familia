@@ -67,22 +67,27 @@ class BolsaFamiliaDownloader(Downloader):
         return f"{base_url}/novo-bolsa-familia/{self.year}{self.month:02}_NovoBolsaFamilia.zip"
 
   def fetch(self) -> Path:
-    target_size = 0
     target_path = self.destination / os.path.basename(self.url)
-    req_headers = dict()
 
-    if not self.destination.exists():
-      self.destination.mkdir(exist_ok=True, parents=True)
+    self.destination.mkdir(exist_ok=True, parents=True)
+    target_path.touch(exist_ok=True)
 
-    if target_path.is_file():
-      target_size = os.path.getsize(target_path)
-      req_headers = dict(Range=f"bytes={target_size}-")
+    target_size = os.path.getsize(target_path)
+    req_headers = dict(Range=f"bytes={target_size}-")
 
     with requests.get(self.url, headers=req_headers, stream=True) as download:
-      download.raise_for_status()
+      try:
+        download.raise_for_status()
+      except requests.exceptions.HTTPError as e:
+        if e.response.status_code == 416:
+          return self.destination
 
-      with open(self.destination / os.path.basename(self.url), 'wb') as f:
+        target_path.unlink()
+        raise e
+
+      with open(target_path, 'ab') as f:
         for chunck in download.iter_content(chunk_size=4096):
           f.write(chunck)
 
     return target_path
+
