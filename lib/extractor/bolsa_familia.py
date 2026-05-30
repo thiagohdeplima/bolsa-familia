@@ -29,6 +29,9 @@ class BolsaFamiliaExtractor:
 
     self.destination.parent.mkdir(parents=True, exist_ok=True)
 
+    if self.destination.exists():
+      return self.destination
+
     df = pd.read_csv(self.source, **self.csv_args)
     df = self.__prepare_dataframe(df, program)
     df.to_parquet(self.destination,
