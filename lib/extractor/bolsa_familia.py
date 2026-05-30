@@ -1,5 +1,6 @@
 import gc
 import os
+import tempfile
 import re
 
 import pandas as pd
@@ -34,12 +35,18 @@ class BolsaFamiliaExtractor:
 
     df = pd.read_csv(self.source, **self.csv_args)
     df = self.__prepare_dataframe(df, program)
-    df.to_parquet(self.destination,
-      engine="pyarrow",
-      compression="zstd",
-      compression_level=12,
-      index=False
-    )
+
+    with tempfile.NamedTemporaryFile(dir=self.destination.parent,delete=False) as tmp:
+      tmp_parquet_file = Path(tmp.name)
+
+      df.to_parquet(tmp_parquet_file,
+        engine="pyarrow",
+        compression="zstd",
+        compression_level=12,
+        index=False
+      )
+
+      tmp_parquet_file.name(self.destination)
 
     del(df)
     gc.collect()
