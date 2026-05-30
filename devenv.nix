@@ -1,7 +1,7 @@
 { pkgs, lib, config, inputs, ... }:
 
 {
-  packages = with pkgs; [ pandoc git ];
+  packages = with pkgs; [ pandoc git duckdb ];
 
   languages = {
     python = {
