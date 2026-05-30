@@ -1,8 +1,10 @@
+import os
+
 from datetime import date
 from pathlib import Path
 
 from prefect import flow, task
-from prefect.task_runners import ConcurrentTaskRunner
+from prefect.futures import wait
 
 from extractor.bolsa_familia import BolsaFamiliaExtractor
 from ingestion.bolsa_familia import BolsaFamiliaDownloader, Program
@@ -16,8 +18,9 @@ def download(year: int, month: int) -> Path:
 def extract(path: Path) -> Path:
   return BolsaFamiliaExtractor(path).run()
 
-@flow
+@flow(log_prints=True)
 def main():
+  extractions = []
   current = Program.BOLSA_FAMILIA_1.value
 
   while date.today() >= current:
@@ -28,9 +31,15 @@ def main():
       month=current.month,
     )
 
-    extract.with_options(
+    extraction = extract.with_options(
       name=f"extract-bf-{current.year}-{current.month:02}"
     ).submit(path)
+
+    extractions.append(extraction)
+
+    if len(extractions) >= int(os.getenv('CONCURRENCY', '50')):
+      wait(extractions)
+      extractions.clear()
 
     current = get_next_month(current)
 
