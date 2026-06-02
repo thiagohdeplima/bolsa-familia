@@ -1,4 +1,5 @@
 import os
+import argparse
 
 from datetime import date
 from pathlib import Path
@@ -19,11 +20,11 @@ def extract(path: Path) -> Path:
   return BolsaFamiliaExtractor(path).run()
 
 @flow(log_prints=True)
-def main():
+def run_pipeline(since: date, until: date):
   extractions = []
-  current = Program.BOLSA_FAMILIA_1.value
+  current = since
 
-  while date.today() >= current:
+  while until >= current:
     path = download.with_options(
       name=f"download-bf-{current.year}-{current.month:02}"
     ).submit(
@@ -42,6 +43,25 @@ def main():
       extractions.clear()
 
     current = get_next_month(current)
+
+def main():
+  parser = argparse.ArgumentParser()
+  parser.add_argument(
+    "--since",
+    metavar="YYYY-MM",
+    help="Data inicial a processar (ex: 2004-01). Padrão: início do programa.",
+  )
+  parser.add_argument(
+    "--until",
+    metavar="YYYY-MM",
+    help="Data final a processar (ex: 2024-06). Padrão: mês atual.",
+  )
+  args = parser.parse_args()
+
+  since = date.fromisoformat(f"{args.since}-01") if args.since else Program.BOLSA_FAMILIA_1.value
+  until = date.fromisoformat(f"{args.until}-01") if args.until else date.today().replace(day=1)
+
+  run_pipeline(since=since, until=until)
 
 def get_next_month(current: date) -> date:
   year = current.year
