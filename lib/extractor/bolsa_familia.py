@@ -69,9 +69,11 @@ class BolsaFamiliaExtractor:
 
   def __prepare_dataframe(self, df: pd.DataFrame, program: Program) -> pd.DataFrame:
     df["PROGRAMA"] = program
+    df["SOURCE"] = self.source
+
+    df["SOURCE"] = df["SOURCE"].astype("category")
     df["PROGRAMA"] = df["PROGRAMA"].astype("category")
     df["UF"] = df["UF"].astype("category")
-
 
     df["NOME MUNICÍPIO"] = df["NOME MUNICÍPIO"].astype("category")
     df["CÓDIGO MUNICÍPIO SIAFI"] = df["CÓDIGO MUNICÍPIO SIAFI"].astype("category")
